@@ -5,6 +5,13 @@
 This application is a slideshow video generator.  
 You provide a configuration path, and the video is generated using [FFMPEG](https://ffmpeg.org/).  
 
+### Features:
+- Slide transitions
+- Video in/out transitions
+- Custom video dimensions
+- Randomizable options
+- Image effects
+
 ## CLI
 Pass it the config file path.  
 
@@ -14,10 +21,10 @@ Download an executable from the [Releases](https://github.com/siljamdev/cerium/r
 It is probably compatible with MacOS.  
 
 ## Requirements
-FFMPEG installed and added to the PATH variable  
+[FFMPEG](https://ffmpeg.org/) installed and added to the PATH variable  
 
 ## Example config
 Find it [here](docs/complete.conf)  
 
 ## License
-This software is licensed under the [MIT License](https://github.com/siljamdev/lstripgen/blob/main/LICENSE).
+This software is licensed under the [MIT License](./LICENSE).
