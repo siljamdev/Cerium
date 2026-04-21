@@ -11,20 +11,20 @@ You provide a configuration path, and the video is generated using [FFMPEG](http
 - Custom video dimensions
 - Randomizable options
 - Image effects
+- Image scaling options
 
 ## CLI
 Pass it the config file path.  
 
 ## Installation
-This application is available for Windows and Linux.  
+This application is available for Windows, Linux and MacOS.  
 Download an executable from the [Releases](https://github.com/siljamdev/cerium/releases/latest).  
-It is probably compatible with MacOS.  
 
 ## Requirements
-[FFMPEG](https://ffmpeg.org/) installed and added to the PATH variable  
+[FFMPEG](https://ffmpeg.org/) installed and added to the PATH variable.  
 
 ## Example config
-Find it [here](docs/complete.conf)  
+Find a complete config with all options [here](docs/complete.conf).  
 
 ## License
 This software is licensed under the [MIT License](./LICENSE).
