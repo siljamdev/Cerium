@@ -36,6 +36,7 @@ class Config{
 	float? defaultSlideTransitionDurationMax = null;
 	
 	ImageFilter? defaultImageFilter = null;
+	ImageScaling? defaultImageScaling = null;
 	
 	Dictionary<int, float> slideDurationMin = new();
 	Dictionary<int, float> slideDurationMax = new();
@@ -45,6 +46,7 @@ class Config{
 	Dictionary<int, float> slideTransitionDurationMax = new();
 	
 	Dictionary<int, ImageFilter> imageFilter = new();
+	Dictionary<int, ImageScaling> imageScaling = new();
 	
 	string[] imagePool = new string[0];
 	
@@ -88,12 +90,13 @@ class Config{
 		defaultSlideTransitionDurationMax ??= 0f;
 		
 		defaultImageFilter ??= ImageFilter.None;
+		defaultImageScaling ??= ImageScaling.Neighbor;
 	}
 	
 	public Resolved Resolve(){
 		FixNull();
 		
-		string t = title.Replace("%d", DateTime.Now.ToString("dd_MM_yyyy")).Replace("%h", DateTime.Now.ToString("HH_mm_ss"));
+		string t = title.Replace("%d", DateTime.Now.ToString("yyyy_MM_dd")).Replace("%h", DateTime.Now.ToString("HH_mm_ss"));
 		
 		int num = randomInclusive((int) slideNumMin, (int) slideNumMax);
 		
@@ -106,6 +109,7 @@ class Config{
 		Transition[] slideTrans = new Transition[num - 1];
 		float[] slideTransDur = new float[num - 1];
 		ImageFilter[] imFilter = new ImageFilter[num];
+		ImageScaling[] imScaling = new ImageScaling[num];
 		
 		string audioPath = audioPool.Length == 0 ? null : audioPool[rand.Next(audioPool.Length)];
 		
@@ -116,6 +120,7 @@ class Config{
 				durations[i - 1] = determineDuration(i);
 				images[i - 1] = determineImage(i);
 				imFilter[i - 1] = determineImageFilter(i);
+				imScaling[i - 1] = determineImageScaling(i);
 				
 				if(i != num){
 					slideTrans[i - 1] = determineSlideTransition(i);
@@ -145,7 +150,8 @@ class Config{
 			slideTransitions = slideTrans,
 			slideTransitionsDuration = slideTransDur,
 			audioPath = audioPath,
-			imageFilter = imFilter
+			imageFilter = imFilter,
+			imageScaling = imScaling,
 		};
 	}
 	
@@ -179,7 +185,7 @@ class Config{
 		
 		switch(selMode){
 			case ImSelectionMode.Order:
-				return imagePool[n % imagePool.Length];
+				return imagePool[(n - 1) % imagePool.Length];
 			
 			case ImSelectionMode.Random:
 				return imagePool[rand.Next(imagePool.Length)];
@@ -213,6 +219,14 @@ class Config{
 		}
 		
 		return (ImageFilter) defaultImageFilter;
+	}
+	
+	ImageScaling determineImageScaling(int n){
+		if(imageScaling.ContainsKey(n)){
+			return imageScaling[n];
+		}
+		
+		return (ImageScaling) defaultImageScaling;
 	}
 	
 	float determineSlideTransitionDuration(int n){
@@ -266,6 +280,7 @@ class Config{
 				defaultSlideTransitionDurationMax ??= g.defaultSlideTransitionDurationMax;
 				
 				defaultImageFilter ??= g.defaultImageFilter;
+				defaultImageScaling ??= g.defaultImageScaling;
 				
 				//####
 				if(slideDurationMin.Count == 0){
@@ -298,6 +313,10 @@ class Config{
 				
 				if(imageFilter.Count == 0){
 					imageFilter = g.imageFilter;
+				}
+				
+				if(imageScaling.Count == 0){
+					imageScaling = g.imageScaling;
 				}
 				
 				if(audioPool.Length == 0){
@@ -335,6 +354,7 @@ class Config{
 				defaultSlideTransitionDurationMax = g.defaultSlideTransitionDurationMax ?? defaultSlideTransitionDurationMax;
 				
 				defaultImageFilter = g.defaultImageFilter ?? defaultImageFilter;
+				defaultImageScaling = g.defaultImageScaling ?? defaultImageScaling;
 				
 				//####
 				if(g.slideDurationMin.Count != 0){
@@ -367,6 +387,10 @@ class Config{
 				
 				if(imageFilter.Count != 0){
 					imageFilter = g.imageFilter;
+				}
+				
+				if(imageScaling.Count != 0){
+					imageScaling = g.imageScaling;
 				}
 				
 				if(g.audioPool.Length != 0){
@@ -404,6 +428,7 @@ class Config{
 				defaultSlideTransitionDurationMax = g.defaultSlideTransitionDurationMax ?? defaultSlideTransitionDurationMax;
 				
 				defaultImageFilter = g.defaultImageFilter ?? defaultImageFilter;
+				defaultImageScaling = g.defaultImageScaling ?? defaultImageScaling;
 				
 				//####
 				slideDurationMin = MergeDicts(g.slideDurationMin, slideDurationMin);
@@ -418,6 +443,7 @@ class Config{
 				slideTransitionDurationMax = MergeDicts(g.slideTransitionDurationMax, slideTransitionDurationMax);
 				
 				imageFilter = MergeDicts(g.imageFilter, imageFilter);
+				imageScaling = MergeDicts(g.imageScaling, imageScaling);
 				
 				audioPool = g.audioPool.Concat(audioPool).ToArray();
 				
@@ -452,6 +478,7 @@ class Config{
 				defaultSlideTransitionDurationMax ??= g.defaultSlideTransitionDurationMax;
 				
 				defaultImageFilter ??= g.defaultImageFilter;
+				defaultImageScaling ??= g.defaultImageScaling;
 				
 				//####
 				slideDurationMin = MergeDicts(slideDurationMin, g.slideDurationMin);
@@ -466,6 +493,7 @@ class Config{
 				slideTransitionDurationMax = MergeDicts(slideTransitionDurationMax, g.slideTransitionDurationMax);
 				
 				imageFilter = MergeDicts(imageFilter, g.imageFilter);
+				imageScaling = MergeDicts(imageScaling, g.imageScaling);
 				
 				audioPool = audioPool.Concat(g.audioPool).ToArray();
 				
@@ -969,6 +997,29 @@ class Config{
 						g.imageFilter[s2] = l.getImFilterAt(1);
 						break;
 					
+					case "def_slide_scaling":
+						if(!testValLen(1, l)){
+							break;
+						}
+						
+						g.defaultImageScaling = l.getImScalingAt(0);
+						
+						break;
+					
+					case "slide_scaling":
+						if(!testValLen(2, l)){
+							break;
+						}
+						
+						s2 = l.getIntAt(0);
+						if(s2 <= 0){
+							parseError("Expected a slide number bigger than 0 (no 0 indexing!)", l);
+							break;
+						}
+						
+						g.imageScaling[s2] = l.getImScalingAt(1);
+						break;
+					
 					case "image_selection_mode":
 						if(!testValLen(1, l)){
 							break;
@@ -1024,7 +1075,7 @@ class Config{
 		foreach(string imFolder in imageFolders){
 			string actualPath = getGlobalPath(imFolder, directory);
 			
-			string[] pngFiles = Directory.GetFiles(actualPath, "*").Where(h => imageExt.Contains(Path.GetExtension(h).ToLower())).ToArray(); //Is global always
+			string[] pngFiles = Directory.GetFiles(actualPath, "*.*").Where(h => imageExt.Contains(Path.GetExtension(h).ToLower())).ToArray(); //Is global always
 			
 			g.imagePool = g.imagePool.Concat(pngFiles).ToArray();
 		}
@@ -1032,7 +1083,7 @@ class Config{
 		foreach(string auFolder in audioFolders){
 			string actualPath = getGlobalPath(auFolder, directory);
 			
-			string[] files = Directory.GetFiles(actualPath, "*").Where(h => audioExt.Contains(Path.GetExtension(h).ToLower())).ToArray(); //Is global always
+			string[] files = Directory.GetFiles(actualPath, "*.*").Where(h => audioExt.Contains(Path.GetExtension(h).ToLower())).ToArray(); //Is global always
 			
 			g.audioPool = g.audioPool.Concat(files).ToArray();
 		}
@@ -1159,4 +1210,8 @@ enum ImSelectionMode{
 //hue=s=0, scale=w=256:h='256 * (ih/iw)':flags=neighbor,
 enum ImageFilter{
 	None, GrayScale, Pixelize
+}
+
+enum ImageScaling{
+	Neighbor, Bilinear, Area, Bicubic, Spline, Lanczos, FastBilinear, Gauss
 }

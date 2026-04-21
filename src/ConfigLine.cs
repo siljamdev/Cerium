@@ -149,6 +149,24 @@ class ConfigLine{
 		};
 	}
 	
+	public ImageScaling getImScalingAt(int n){
+		if(!tryValueAt(n)){
+			throw new Exception("Expected image scaling at position " + n);
+		}
+		
+		return values[n].ToLower() switch{
+			"neighbor" => ImageScaling.Neighbor,
+			"bilinear" => ImageScaling.Bilinear,
+			"area" => ImageScaling.Area,
+			"bicubic" => ImageScaling.Bicubic,
+			"spline" => ImageScaling.Spline,
+			"lanczos" => ImageScaling.Lanczos,
+			"fastBilinear" => ImageScaling.FastBilinear,
+			"gauss" => ImageScaling.Gauss,
+			_ => throw new Exception("Expected image scaling, found: " + values[n])
+		};
+	}
+	
 	public override string ToString(){
 		return keyword + ": " + string.Join(" ", values.Select(h => "'" + h + "'"));
 	}

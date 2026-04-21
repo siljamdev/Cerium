@@ -26,6 +26,7 @@ class Resolved{
 	public string audioPath {get; init;}
 	
 	public ImageFilter[] imageFilter {get; init;}
+	public ImageScaling[] imageScaling {get; init;}
 	
 	//NOT ACCURATE
 	public float totalDuration => slideDuration.Sum() + slideTransitionsDuration.Sum();
@@ -56,7 +57,7 @@ class Resolved{
 			filterComplex.Append(
 				"[" + (b ? (i + 1) : i) + ":v]" +
 				toImageFilter(imageFilter[i]) +
-				"scale=w='if(gt(a," + width + "/" + height + ")," + width + ",-1)':h='if(gt(a," + width + "/" + height + "),-1," + height + ")':flags=neighbor," +
+				"scale=w='if(gt(a," + width + "/" + height + ")," + width + ",-1)':h='if(gt(a," + width + "/" + height + "),-1," + height + ")':flags=" + toScalingName(imageScaling[i]) + "," +
 				"pad=" + width + ":" + height + ":(" + width + "-iw)/2:(" + height + "-ih)/2:color=" + fillColor + ",setsar=1,format=yuv420p[v" + i + "];"
 			);
 		}
@@ -158,11 +159,11 @@ class Resolved{
 				
 				case Transition.Black:
 				case Transition.Fade:
-					filterComplex.Append("[pre_in]reverse,fade=t=in:st=0:d=" + startTransitionDuration + ",reverse[out];");
+					filterComplex.Append("[pre_in]reverse,fade=t=in:st=0:d=" + endTransitionDuration + ",reverse[out];");
 					break;
 				
 				case Transition.White:
-					filterComplex.Append("[pre_in]reverse,format=rgba,fade=t=in:st=0:d=" + startTransitionDuration + ":alpha=1,reverse[pre_out];");
+					filterComplex.Append("[pre_in]reverse,format=rgba,fade=t=in:st=0:d=" + endTransitionDuration + ":alpha=1,reverse[pre_out];");
 					filterComplex.Append("[whitebg][pre_out]overlay[out];");
 					break;
 			}
@@ -183,6 +184,20 @@ class Resolved{
 			Transition.Fade => "fade",
 			Transition.Black => "fadeblack",
 			Transition.White => "fadewhite",
+			_ => ""
+		};
+	}
+	
+	static string toScalingName(ImageScaling s){
+		return s switch{
+			ImageScaling.Neighbor => "neighbor",
+			ImageScaling.Bilinear => "bilinear",
+			ImageScaling.Area => "area",
+			ImageScaling.Bicubic => "bicubic",
+			ImageScaling.Spline => "spline",
+			ImageScaling.Lanczos => "lanczos",
+			ImageScaling.FastBilinear => "fast_bilinear",
+			ImageScaling.Gauss => "gauss",
 			_ => ""
 		};
 	}
