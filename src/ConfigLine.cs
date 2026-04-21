@@ -161,7 +161,7 @@ class ConfigLine{
 			"bicubic" => ImageScaling.Bicubic,
 			"spline" => ImageScaling.Spline,
 			"lanczos" => ImageScaling.Lanczos,
-			"fastBilinear" => ImageScaling.FastBilinear,
+			"fast_bilinear" => ImageScaling.FastBilinear,
 			"gauss" => ImageScaling.Gauss,
 			_ => throw new Exception("Expected image scaling, found: " + values[n])
 		};
