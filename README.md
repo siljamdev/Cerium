@@ -78,9 +78,9 @@ List of valid options:
 |`slide_image`|2|[slide index](#slide-index), `image path`||Sets the image for a specific slide with its file path|
 |`image_selection_mode`|1|[image selection mode](#image-selection-mode)|`random`|Sets how the images for the slides will be chosen from the pool|
 |`image_pool`|non 0|`image path 1`, `image path 2`, ...||Adds all the images to the image pool|
-|`image_folder`|1|`path to folder`||Adds to the image pool all the [images](#Image extensions) inside the folder|
+|`image_folder`|1|`path to folder`||Adds to the image pool all the [images](#Image-extensions) inside the folder|
 |`audio_pool`|non 0|`audio path 1`, `audio path 2`, ...||Adds all the audios to the audio pool|
-|`audio_folder`|1|`path to folder`||Adds to the audio pool all the [audios](#Audio extensions) inside the folder|
+|`audio_folder`|1|`path to folder`||Adds to the audio pool all the [audios](#Audio-extensions) inside the folder|
 |`audio_filter`|1|[audio filter](#audio-filter)|`none`|Sets the filter for the audio chosen from the audio pool (if any)|
 
 ### Types of arguments:
