@@ -10,7 +10,7 @@ class Cerium{
 		}
 		
 		if(!File.Exists(args[0])){
-			Console.Error.WriteLine(args[0] + " does not exist. Please provide a valid path");
+			Console.Error.WriteLine("'" + args[0] + "' does not exist. Please provide a valid config path");
 			return 2;
 		}
 		
@@ -19,11 +19,13 @@ class Cerium{
 			Resolved res = config.Resolve();
 			string fa = res.getFfmpegArgs();
 			
+			string ffmpegPath = config.GetFFMPEGPath();
+			
 			Console.WriteLine(fa);
 			Console.WriteLine("\n\n\n\n");
 			
 			ProcessStartInfo psi = new ProcessStartInfo{
-				FileName = "ffmpeg",
+				FileName = ffmpegPath,
 				Arguments = fa,
 				UseShellExecute = false,
 				RedirectStandardOutput = false,
@@ -36,6 +38,8 @@ class Cerium{
 			
 			int xc = process.ExitCode;
 			Console.WriteLine("FFmpeg finished with code " + xc);
+			
+			res.cleanup();
 			
 			return xc == 0 ? 0 : 4;
 		}catch(Exception e){

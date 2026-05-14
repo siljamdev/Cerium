@@ -19,11 +19,13 @@ class Config{
 	
 	string title = null;
 	
-	Transition? startTransition = null;
+	int? fps = null;
+	
+	VideoTransition? startTransition = null;
 	float? startTransitionDurationMin = null;
 	float? startTransitionDurationMax = null;
 	
-	Transition? endTransition = null;
+	VideoTransition? endTransition = null;
 	float? endTransitionDurationMin = null;
 	float? endTransitionDurationMax = null;
 	
@@ -31,9 +33,11 @@ class Config{
 	
 	ImSelectionMode? selMode = null;
 	
-	Transition? defaultSlideTransition = null;
+	SlideTransition? defaultSlideTransition = null;
 	float? defaultSlideTransitionDurationMin = null;
 	float? defaultSlideTransitionDurationMax = null;
+	
+	SlideMotion? defaultSlideMotion = null;
 	
 	ImageFilter? defaultImageFilter = null;
 	ImageScaling? defaultImageScaling = null;
@@ -41,12 +45,19 @@ class Config{
 	Dictionary<int, float> slideDurationMin = new();
 	Dictionary<int, float> slideDurationMax = new();
 	
-	Dictionary<int, Transition> slideTransitionEffect = new();
+	Dictionary<int, SlideTransition> slideTransitionEffect = new();
 	Dictionary<int, float> slideTransitionDurationMin = new();
 	Dictionary<int, float> slideTransitionDurationMax = new();
 	
+	Dictionary<int, SlideMotion> slideMotion = new();
+	
 	Dictionary<int, ImageFilter> imageFilter = new();
 	Dictionary<int, ImageScaling> imageScaling = new();
+	
+	ImageFilter? videoFilter = null;
+	AudioFilter? audioFilter = null;
+	
+	string ffmpegPath = null;
 	
 	string[] imagePool = new string[0];
 	
@@ -70,6 +81,8 @@ class Config{
 		
 		title ??= "%d_%h";
 		
+		fps ??= 30;
+		
 		fillColor ??= new Color3(0, 0, 0);
 		
 		selMode ??= ImSelectionMode.Random;
@@ -77,20 +90,31 @@ class Config{
 		width ??= 1920;
 		height ??= 1080;
 		
-		startTransition ??= Transition.None;
-		startTransitionDurationMin ??= 1f;
-		startTransitionDurationMax ??= 1f;
+		startTransition ??= VideoTransition.None;
+		startTransitionDurationMin ??= 0f;
+		startTransitionDurationMax ??= 0f;
 		
-		endTransition ??= Transition.None;
-		endTransitionDurationMin ??= 1f;
-		endTransitionDurationMax ??= 1f;
+		endTransition ??= VideoTransition.None;
+		endTransitionDurationMin ??= 0f;
+		endTransitionDurationMax ??= 0f;
 		
-		defaultSlideTransition ??= Transition.None;
+		defaultSlideTransition ??= SlideTransition.None;
 		defaultSlideTransitionDurationMin ??= 0f;
 		defaultSlideTransitionDurationMax ??= 0f;
 		
+		defaultSlideMotion ??= SlideMotion.None;
+		
 		defaultImageFilter ??= ImageFilter.None;
 		defaultImageScaling ??= ImageScaling.Neighbor;
+		
+		videoFilter ??= ImageFilter.None;
+		audioFilter ??= AudioFilter.None;
+		
+		ffmpegPath ??= "ffmpeg";
+	}
+	
+	public string GetFFMPEGPath(){
+		return ffmpegPath;
 	}
 	
 	public Resolved Resolve(){
@@ -106,10 +130,11 @@ class Config{
 		
 		float[] durations = new float[num];
 		string[] images = new string[num];
-		Transition[] slideTrans = new Transition[num - 1];
+		SlideTransition[] slideTrans = new SlideTransition[num - 1];
 		float[] slideTransDur = new float[num - 1];
 		ImageFilter[] imFilter = new ImageFilter[num];
 		ImageScaling[] imScaling = new ImageScaling[num];
+		//SlideMotion[] slideMot = new SlideMotion[num];
 		
 		string audioPath = audioPool.Length == 0 ? null : audioPool[rand.Next(audioPool.Length)];
 		
@@ -121,6 +146,7 @@ class Config{
 				images[i - 1] = determineImage(i);
 				imFilter[i - 1] = determineImageFilter(i);
 				imScaling[i - 1] = determineImageScaling(i);
+				//slideMot[i - 1] = determineSlideMotion(i);
 				
 				if(i != num){
 					slideTrans[i - 1] = determineSlideTransition(i);
@@ -137,21 +163,25 @@ class Config{
 		
 		return new Resolved{
 			title = t,
+			fps = (int) fps,
 			slideNum = num,
 			slideDuration = durations,
 			imagePaths = images,
-			startTransition = (Transition) startTransition,
+			startTransition = (VideoTransition) startTransition,
 			startTransitionDuration = stTD,
-			endTransition = (Transition) endTransition,
+			endTransition = (VideoTransition) endTransition,
 			endTransitionDuration = enTD,
 			fillColor = (Color3) fillColor,
 			width = (int) width,
 			height = (int) height,
 			slideTransitions = slideTrans,
 			slideTransitionsDuration = slideTransDur,
+			//slideMotions = slideMot,
 			audioPath = audioPath,
 			imageFilter = imFilter,
 			imageScaling = imScaling,
+			videoFilter = (ImageFilter) videoFilter,
+			audioFilter = (AudioFilter) audioFilter,
 		};
 	}
 	
@@ -159,14 +189,14 @@ class Config{
 		float m;
 		float x;
 		
-		if(slideDurationMin.ContainsKey(n)){
-			m = slideDurationMin[n];
+		if(slideDurationMin.TryGetValue(n, out float xx1)){
+			m = xx1;
 		}else{
 			m = (float) defaultSlideDurationMin;
 		}
 		
-		if(slideDurationMax.ContainsKey(n)){
-			x = slideDurationMax[n];
+		if(slideDurationMax.TryGetValue(n, out float xx12)){
+			x = xx12;
 		}else{
 			x = (float) defaultSlideDurationMax;
 		}
@@ -175,8 +205,8 @@ class Config{
 	}
 	
 	string determineImage(int n){
-		if(images.ContainsKey(n)){
-			return images[n];
+		if(images.TryGetValue(n, out string ymm)){
+			return ymm;
 		}
 		
 		if(imagePool.Length == 0){
@@ -185,7 +215,7 @@ class Config{
 		
 		switch(selMode){
 			case ImSelectionMode.Order:
-				return imagePool[(n - 1) % imagePool.Length];
+				return imagePool[(n - 1) % imagePool.Length]; //n - 1 because first slide is slide 1, not 0
 			
 			case ImSelectionMode.Random:
 				return imagePool[rand.Next(imagePool.Length)];
@@ -205,48 +235,72 @@ class Config{
 		return imagePool[rand.Next(imagePool.Length)];
 	}
 	
-	Transition determineSlideTransition(int n){
-		if(slideTransitionEffect.ContainsKey(n)){
-			return slideTransitionEffect[n];
+	SlideTransition determineSlideTransition(int n){
+		SlideTransition t = (SlideTransition) defaultSlideTransition;
+		if(slideTransitionEffect.TryGetValue(n, out SlideTransition st)){
+			t = st;
 		}
 		
-		return (Transition) defaultSlideTransition;
-	}
-	
-	ImageFilter determineImageFilter(int n){
-		if(imageFilter.ContainsKey(n)){
-			return imageFilter[n];
-		}
-		
-		return (ImageFilter) defaultImageFilter;
-	}
-	
-	ImageScaling determineImageScaling(int n){
-		if(imageScaling.ContainsKey(n)){
-			return imageScaling[n];
-		}
-		
-		return (ImageScaling) defaultImageScaling;
+		return t switch{
+			SlideTransition.SlideRandom => rand.Next(4) switch{
+					0 => SlideTransition.SlideDown,
+					1 => SlideTransition.SlideUp,
+					2 => SlideTransition.SlideLeft,
+					_ => SlideTransition.SlideRight,
+				},
+			SlideTransition.WipeRandom => rand.Next(4) switch{
+					0 => SlideTransition.WipeDown,
+					1 => SlideTransition.WipeUp,
+					2 => SlideTransition.WipeLeft,
+					_ => SlideTransition.WipeRight,
+				},
+			_ => t
+		};
 	}
 	
 	float determineSlideTransitionDuration(int n){
 		float m;
 		float x;
 		
-		if(slideTransitionDurationMin.ContainsKey(n)){
-			m = slideTransitionDurationMin[n];
+		if(slideTransitionDurationMin.TryGetValue(n, out float xx1)){
+			m = xx1;
 		}else{
 			m = (float) defaultSlideTransitionDurationMin;
 		}
 		
-		if(slideTransitionDurationMax.ContainsKey(n)){
-			x = slideTransitionDurationMax[n];
+		if(slideTransitionDurationMax.TryGetValue(n, out float xx12)){
+			x = xx12;
 		}else{
 			x = (float) defaultSlideTransitionDurationMax;
 		}
 		
 		return randomRange(m, x);
 	}
+	
+	SlideMotion determineSlideMotion(int n){
+		if(slideMotion.TryGetValue(n, out SlideMotion sm)){
+			return sm;
+		}
+		
+		return (SlideMotion) defaultSlideMotion;
+	}
+	
+	ImageFilter determineImageFilter(int n){
+		if(imageFilter.TryGetValue(n, out ImageFilter iff)){
+			return iff;
+		}
+		
+		return (ImageFilter) defaultImageFilter;
+	}
+	
+	ImageScaling determineImageScaling(int n){
+		if(imageScaling.TryGetValue(n, out ImageScaling iss)){
+			return iss;
+		}
+		
+		return (ImageScaling) defaultImageScaling;
+	}
+	
 	
 	
 	public void Include(Config g){
@@ -259,6 +313,8 @@ class Config{
 				defaultSlideDurationMax ??= g.defaultSlideDurationMax;
 				
 				title ??= g.title;
+				
+				fps ??= g.fps;
 				
 				startTransition ??= g.startTransition;
 				startTransitionDurationMin ??= g.startTransitionDurationMin;
@@ -279,8 +335,15 @@ class Config{
 				defaultSlideTransitionDurationMin ??= g.defaultSlideTransitionDurationMin;
 				defaultSlideTransitionDurationMax ??= g.defaultSlideTransitionDurationMax;
 				
+				defaultSlideMotion ??= g.defaultSlideMotion;
+				
 				defaultImageFilter ??= g.defaultImageFilter;
 				defaultImageScaling ??= g.defaultImageScaling;
+				
+				videoFilter ??= g.videoFilter;
+				audioFilter ??= g.audioFilter;
+				
+				ffmpegPath ??= g.ffmpegPath;
 				
 				//####
 				if(slideDurationMin.Count == 0){
@@ -311,6 +374,10 @@ class Config{
 					slideTransitionDurationMax = g.slideTransitionDurationMax;
 				}
 				
+				if(slideMotion.Count == 0){
+					slideMotion = g.slideMotion;
+				}
+				
 				if(imageFilter.Count == 0){
 					imageFilter = g.imageFilter;
 				}
@@ -334,6 +401,8 @@ class Config{
 				
 				title = g.title ?? title;
 				
+				fps = g.fps ?? fps;
+				
 				startTransition = g.startTransition ?? startTransition;
 				startTransitionDurationMin = g.startTransitionDurationMin ?? startTransitionDurationMin;
 				startTransitionDurationMax = g.startTransitionDurationMax ?? startTransitionDurationMax;
@@ -353,8 +422,15 @@ class Config{
 				defaultSlideTransitionDurationMin = g.defaultSlideTransitionDurationMin ?? defaultSlideTransitionDurationMin;
 				defaultSlideTransitionDurationMax = g.defaultSlideTransitionDurationMax ?? defaultSlideTransitionDurationMax;
 				
+				defaultSlideMotion = g.defaultSlideMotion ?? defaultSlideMotion;
+				
 				defaultImageFilter = g.defaultImageFilter ?? defaultImageFilter;
 				defaultImageScaling = g.defaultImageScaling ?? defaultImageScaling;
+				
+				videoFilter = g.videoFilter ?? videoFilter;
+				audioFilter = g.audioFilter ?? audioFilter;
+				
+				ffmpegPath = g.ffmpegPath ?? ffmpegPath;
 				
 				//####
 				if(g.slideDurationMin.Count != 0){
@@ -385,11 +461,15 @@ class Config{
 					slideTransitionDurationMax = g.slideTransitionDurationMax;
 				}
 				
-				if(imageFilter.Count != 0){
+				if(g.slideMotion.Count != 0){
+					slideMotion = g.slideMotion;
+				}
+				
+				if(g.imageFilter.Count != 0){
 					imageFilter = g.imageFilter;
 				}
 				
-				if(imageScaling.Count != 0){
+				if(g.imageScaling.Count != 0){
 					imageScaling = g.imageScaling;
 				}
 				
@@ -407,6 +487,8 @@ class Config{
 				defaultSlideDurationMax = g.defaultSlideDurationMax ?? defaultSlideDurationMax;
 				
 				title = g.title ?? title;
+				
+				fps = g.fps ?? fps;
 				
 				startTransition = g.startTransition ?? startTransition;
 				startTransitionDurationMin = g.startTransitionDurationMin ?? startTransitionDurationMin;
@@ -427,8 +509,15 @@ class Config{
 				defaultSlideTransitionDurationMin = g.defaultSlideTransitionDurationMin ?? defaultSlideTransitionDurationMin;
 				defaultSlideTransitionDurationMax = g.defaultSlideTransitionDurationMax ?? defaultSlideTransitionDurationMax;
 				
+				defaultSlideMotion = g.defaultSlideMotion ?? defaultSlideMotion;
+				
 				defaultImageFilter = g.defaultImageFilter ?? defaultImageFilter;
 				defaultImageScaling = g.defaultImageScaling ?? defaultImageScaling;
+				
+				videoFilter = g.videoFilter ?? videoFilter;
+				audioFilter = g.audioFilter ?? audioFilter;
+				
+				ffmpegPath = g.ffmpegPath ?? ffmpegPath;
 				
 				//####
 				slideDurationMin = MergeDicts(g.slideDurationMin, slideDurationMin);
@@ -441,6 +530,8 @@ class Config{
 				slideTransitionEffect = MergeDicts(g.slideTransitionEffect, slideTransitionEffect);
 				slideTransitionDurationMin = MergeDicts(g.slideTransitionDurationMin, slideTransitionDurationMin);
 				slideTransitionDurationMax = MergeDicts(g.slideTransitionDurationMax, slideTransitionDurationMax);
+				
+				slideMotion = MergeDicts(g.slideMotion, slideMotion);
 				
 				imageFilter = MergeDicts(g.imageFilter, imageFilter);
 				imageScaling = MergeDicts(g.imageScaling, imageScaling);
@@ -457,6 +548,8 @@ class Config{
 				defaultSlideDurationMax ??= g.defaultSlideDurationMax;
 				
 				title ??= g.title;
+				
+				fps ??= g.fps;
 				
 				startTransition ??= g.startTransition;
 				startTransitionDurationMin ??= g.startTransitionDurationMin;
@@ -477,8 +570,15 @@ class Config{
 				defaultSlideTransitionDurationMin ??= g.defaultSlideTransitionDurationMin;
 				defaultSlideTransitionDurationMax ??= g.defaultSlideTransitionDurationMax;
 				
+				defaultSlideMotion ??= g.defaultSlideMotion;
+				
 				defaultImageFilter ??= g.defaultImageFilter;
 				defaultImageScaling ??= g.defaultImageScaling;
+				
+				videoFilter ??= g.videoFilter;
+				audioFilter ??= g.audioFilter;
+				
+				ffmpegPath ??= g.ffmpegPath;
 				
 				//####
 				slideDurationMin = MergeDicts(slideDurationMin, g.slideDurationMin);
@@ -491,6 +591,8 @@ class Config{
 				slideTransitionEffect = MergeDicts(slideTransitionEffect, g.slideTransitionEffect);
 				slideTransitionDurationMin = MergeDicts(slideTransitionDurationMin, g.slideTransitionDurationMin);
 				slideTransitionDurationMax = MergeDicts(slideTransitionDurationMax, g.slideTransitionDurationMax);
+				
+				slideMotion = MergeDicts(slideMotion, g.slideMotion);
 				
 				imageFilter = MergeDicts(imageFilter, g.imageFilter);
 				imageScaling = MergeDicts(imageScaling, g.imageScaling);
@@ -526,12 +628,15 @@ class Config{
 				switch(l.keyword){
 					case "include":
 						if(l.valueNum < 1){
-							parseError("Expected at least 1 values", l);
+							parseError("Expected at least 1 value", l);
 							break;
 						}
 						
 						//Choose only one randomly. Doing it here makes it so we dont have to store anything else
-						toInclude.Add(l.values[rand.Next(l.values.Length)]);
+						string inc = l.values[rand.Next(l.values.Length)];
+						if(inc != "none"){
+							toInclude.Add(inc);
+						}
 						
 						break;
 					
@@ -549,6 +654,14 @@ class Config{
 						}
 						
 						rand = new Random(l.getIntAt(0));
+						break;
+					
+					case "ffmpeg_path":
+						if(!testValLen(1, l)){
+							break;
+						}
+						
+						g.ffmpegPath = l.getValAt(0);
 						break;
 					
 					case "video_out":
@@ -584,14 +697,36 @@ class Config{
 						g.height = l.getUintAt(1);
 						break;
 					
+					case "video_filter":
+						if(!testValLen(1, l)){
+							break;
+						}
+						
+						g.videoFilter = l.getImFilterAt(0);
+						break;
+					
+					case "video_framerate":
+						if(!testValLen(1, l)){
+							break;
+						}
+						
+						int f = l.getUintAt(0);
+						if(f == 0){
+							parseError("Expected a framerate number bigger than 0", l);
+							break;
+						}
+						
+						g.fps = f;
+						break;
+					
 					case "in_transition":
 						if(l.valueNum == 2){
-							g.startTransition = l.getTransitionAt(0);
+							g.startTransition = l.getVideoTransitionAt(0);
 							float n = l.getUnumAt(1);
 							g.startTransitionDurationMin = n;
 							g.startTransitionDurationMax = n;
 						}else if(l.valueNum == 3){
-							g.startTransition = l.getTransitionAt(0);
+							g.startTransition = l.getVideoTransitionAt(0);
 							g.startTransitionDurationMin = l.getUnumAt(1);
 							g.startTransitionDurationMax = l.getUnumAt(2);
 						}else{
@@ -635,17 +770,17 @@ class Config{
 							break;
 						}
 						
-						g.startTransition = l.getTransitionAt(0);
+						g.startTransition = l.getVideoTransitionAt(0);
 						break;
 					
 					case "out_transition":
 						if(l.valueNum == 2){
-							g.endTransition = l.getTransitionAt(0);
+							g.endTransition = l.getVideoTransitionAt(0);
 							float n = l.getUnumAt(1);
 							g.endTransitionDurationMin = n;
 							g.endTransitionDurationMax = n;
 						}else if(l.valueNum == 3){
-							g.endTransition = l.getTransitionAt(0);
+							g.endTransition = l.getVideoTransitionAt(0);
 							g.endTransitionDurationMin = l.getUnumAt(1);
 							g.endTransitionDurationMax = l.getUnumAt(2);
 						}else{
@@ -688,7 +823,7 @@ class Config{
 							break;
 						}
 						
-						g.startTransition = l.getTransitionAt(0);
+						g.startTransition = l.getVideoTransitionAt(0);
 						break;
 					
 					case "slide_count":
@@ -814,12 +949,12 @@ class Config{
 					
 					case "def_slide_transition":
 						if(l.valueNum == 2){
-							g.defaultSlideTransition = l.getTransitionAt(0);
+							g.defaultSlideTransition = l.getSlideTransitionAt(0);
 							float n = l.getUnumAt(1);
 							g.defaultSlideTransitionDurationMin = n;
 							g.defaultSlideTransitionDurationMax = n;
 						}else if(l.valueNum == 3){
-							g.defaultSlideTransition = l.getTransitionAt(0);
+							g.defaultSlideTransition = l.getSlideTransitionAt(0);
 							g.defaultSlideTransitionDurationMin = l.getUnumAt(1);
 							g.defaultSlideTransitionDurationMax = l.getUnumAt(2);
 						}else{
@@ -863,7 +998,7 @@ class Config{
 							break;
 						}
 						
-						g.defaultSlideTransition = l.getTransitionAt(0);
+						g.defaultSlideTransition = l.getSlideTransitionAt(0);
 						break;
 					
 					case "slide_transition":
@@ -874,7 +1009,7 @@ class Config{
 								break;
 							}
 							
-							g.slideTransitionEffect[s] = l.getTransitionAt(1);
+							g.slideTransitionEffect[s] = l.getSlideTransitionAt(1);
 							float n = l.getUnumAt(2);
 							g.slideTransitionDurationMin[s] = n;
 							g.slideTransitionDurationMax[s] = n;
@@ -885,7 +1020,7 @@ class Config{
 								break;
 							}
 							
-							g.slideTransitionEffect[s] = l.getTransitionAt(1);
+							g.slideTransitionEffect[s] = l.getSlideTransitionAt(1);
 							g.slideTransitionDurationMin[s] = l.getUnumAt(2);
 							g.slideTransitionDurationMax[s] = l.getUnumAt(3);
 						}else{
@@ -957,8 +1092,31 @@ class Config{
 							break;
 						}
 						
-						g.slideTransitionEffect[s2] = l.getTransitionAt(1);
+						g.slideTransitionEffect[s2] = l.getSlideTransitionAt(1);
 						break;
+					
+					//case "def_slide_motion":
+					//	if(!testValLen(1, l)){
+					//		break;
+					//	}
+					//	
+					//	g.defaultSlideMotion = l.getSlideMotionAt(0);
+					//	
+					//	break;
+					//
+					//case "slide_motion":
+					//	if(!testValLen(2, l)){
+					//		break;
+					//	}
+					//	
+					//	s2 = l.getIntAt(0);
+					//	if(s2 <= 0){
+					//		parseError("Expected a slide number bigger than 0 (no 0 indexing!)", l);
+					//		break;
+					//	}
+					//	
+					//	g.slideMotion[s2] = l.getSlideMotionAt(1);
+					//	break;
 					
 					case "slide_image":
 						if(!testValLen(2, l)){
@@ -1038,6 +1196,11 @@ class Config{
 						break;
 					
 					case "image_pool":
+						if(l.valueNum < 1){
+							parseError("Expected at least 1 value", l);
+							break;
+						}
+						
 						g.imagePool = g.imagePool.Concat(l.values).ToArray();
 						break;
 					
@@ -1051,7 +1214,20 @@ class Config{
 						break;
 					
 					case "audio_pool":
+						if(l.valueNum < 1){
+							parseError("Expected at least 1 value", l);
+							break;
+						}
+						
 						g.audioPool = g.audioPool.Concat(l.values).ToArray();
+						break;
+					
+					case "audio_filter":
+						if(!testValLen(1, l)){
+							break;
+						}
+						
+						g.audioFilter = l.getAFilterAt(0);
 						break;
 					
 					default:
@@ -1199,8 +1375,21 @@ enum Priority{
 	Ignore, Override, Merge, MergeReverse
 }
 
-enum Transition{
-	None, Fade, Black, White
+enum SlideTransition{
+	None, Fade, Black, White,
+	SlideDown, SlideUp, SlideLeft, SlideRight, SlideRandom,
+	WipeDown, WipeUp, WipeLeft, WipeRight, WipeRandom,
+	ZoomIn, ZoomOut,
+	Distance, Burn
+}
+
+enum VideoTransition{
+	None, Black, White
+}
+
+//Cant get this to work properly, too jittery or not enough knowledge of how to do
+enum SlideMotion{
+	None, ZoomIn, ZoomOut
 }
 
 enum ImSelectionMode{
@@ -1209,9 +1398,21 @@ enum ImSelectionMode{
 
 //hue=s=0, scale=w=256:h='256 * (ih/iw)':flags=neighbor,
 enum ImageFilter{
-	None, GrayScale, Pixelize
+	None, GrayScale,
+	Pixelize16, Pixelize32, Pixelize64, Pixelize128, Pixelize256, Pixelize512,
+	Pixelize16GrayScale, Pixelize32GrayScale, Pixelize64GrayScale, Pixelize128GrayScale, Pixelize256GrayScale, Pixelize512GrayScale,
+	Sepia, Invert, Warm, Cool,
+	Blur, BlurStrong, BlurSubtle, BlurGrayScale, BlurStrongGrayScale, BlurSubtleGrayScale,
+	Sharp, SharpGrayScale,
+	Edge, EdgeInvert,
+	Posterize, PosterizeStrong, PosterizeGrayScale, PosterizeStrongGrayScale,
+	Glitch, Noise, NoiseColor, Vibrant, Vhs
+}
+
+enum AudioFilter{
+	None, BassBoost, Tremble, Echo, Reverb, SoftClip, BitCrush, Radio, Vhs, Vinyl, UnderWater, Dreamy, LowQuality
 }
 
 enum ImageScaling{
-	Neighbor, Bilinear, Area, Bicubic, Spline, Lanczos, FastBilinear, Gauss
+	Neighbor, Bilinear, Area, Bicubic, Bicublin, Sinc, Spline, Lanczos, FastBilinear, Gauss
 }

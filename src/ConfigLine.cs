@@ -97,17 +97,57 @@ class ConfigLine{
 		};
 	}
 	
-	public Transition getTransitionAt(int n){
+	public VideoTransition getVideoTransitionAt(int n){
 		if(!tryValueAt(n)){
-			throw new Exception("Expected transition at position " + n);
+			throw new Exception("Expected video transition effect at position " + n);
 		}
 		
 		return values[n].ToLower() switch{
-			"none" => Transition.None,
-			"fade" => Transition.Fade,
-			"black" => Transition.Black,
-			"white" => Transition.White,
-			_ => throw new Exception("Expected transition name, found: " + values[n])
+			"none" => VideoTransition.None,
+			"black" => VideoTransition.Black,
+			"white" => VideoTransition.White,
+			_ => throw new Exception("Expected video transition effect, found: " + values[n])
+		};
+	}
+	
+	public SlideTransition getSlideTransitionAt(int n){
+		if(!tryValueAt(n)){
+			throw new Exception("Expected slide transition effect at position " + n);
+		}
+		
+		return values[n].ToLower() switch{
+			"none" => SlideTransition.None,
+			"fade" => SlideTransition.Fade,
+			"black" => SlideTransition.Black,
+			"white" => SlideTransition.White,
+			"slidedown" => SlideTransition.SlideDown,
+			"slideup" => SlideTransition.SlideUp,
+			"slideleft" => SlideTransition.SlideLeft,
+			"slideright" => SlideTransition.SlideRight,
+			"sliderandom" => SlideTransition.SlideRandom,
+			"wipedown" => SlideTransition.WipeDown,
+			"wipeup" => SlideTransition.WipeUp,
+			"wipeleft" => SlideTransition.WipeLeft,
+			"wiperight" => SlideTransition.WipeRight,
+			"wiperandom" => SlideTransition.WipeRandom,
+			"zoomin" => SlideTransition.ZoomIn,
+			"zoomout" => SlideTransition.ZoomOut,
+			"distance" => SlideTransition.Distance,
+			"burn" => SlideTransition.Burn,
+			_ => throw new Exception("Expected slide transition effect, found: " + values[n])
+		};
+	}
+	
+	public SlideMotion getSlideMotionAt(int n){
+		if(!tryValueAt(n)){
+			throw new Exception("Expected slide motion effect at position " + n);
+		}
+		
+		return values[n].ToLower() switch{
+			"none" => SlideMotion.None,
+			"zoomin" => SlideMotion.ZoomIn,
+			"zoomout" => SlideMotion.ZoomOut,
+			_ => throw new Exception("Expected slide motion effect, found: " + values[n])
 		};
 	}
 	
@@ -144,7 +184,49 @@ class ConfigLine{
 		return values[n].ToLower() switch{
 			"none" => ImageFilter.None,
 			"grayscale" => ImageFilter.GrayScale,
-			"pixelize" => ImageFilter.Pixelize,
+			
+			"pixelize16" => ImageFilter.Pixelize16,
+			"pixelize32" => ImageFilter.Pixelize32,
+			"pixelize64" => ImageFilter.Pixelize64,
+			"pixelize128" => ImageFilter.Pixelize128,
+			"pixelize256" => ImageFilter.Pixelize256,
+			"pixelize512" => ImageFilter.Pixelize512,
+			
+			"pixelize16grayscale" => ImageFilter.Pixelize16GrayScale,
+			"pixelize32grayscale" => ImageFilter.Pixelize32GrayScale,
+			"pixelize64grayscale" => ImageFilter.Pixelize64GrayScale,
+			"pixelize128grayscale" => ImageFilter.Pixelize128GrayScale,
+			"pixelize256grayscale" => ImageFilter.Pixelize256GrayScale,
+			"pixelize512grayscale" => ImageFilter.Pixelize512GrayScale,
+			
+			"sepia" => ImageFilter.Sepia,
+			"invert" => ImageFilter.Invert,
+			"warm" => ImageFilter.Warm,
+			"cool" => ImageFilter.Cool,
+			
+			"blur" => ImageFilter.Blur,
+			"blurstrong" => ImageFilter.BlurStrong,
+			"blursubtle" => ImageFilter.BlurSubtle,
+			"blurgrayscale" => ImageFilter.BlurGrayScale,
+			"blurstronggrayscale" => ImageFilter.BlurStrongGrayScale,
+			"blursubtlegrayscale" => ImageFilter.BlurSubtleGrayScale,
+			
+			"sharp" => ImageFilter.Sharp,
+			"sharpgrayscale" => ImageFilter.SharpGrayScale,
+			
+			"edge" => ImageFilter.Edge,
+			"edgeinvert" => ImageFilter.EdgeInvert,
+			
+			"posterize" => ImageFilter.Posterize,
+			"posterizestrong" => ImageFilter.PosterizeStrong,
+			"posterizegrayscale" => ImageFilter.PosterizeGrayScale,
+			"posterizestronggrayscale" => ImageFilter.PosterizeStrongGrayScale,
+			
+			"glitch" => ImageFilter.Glitch,
+			"noise" => ImageFilter.Noise,
+			"noisecolor" => ImageFilter.NoiseColor,
+			"vibrant" => ImageFilter.Vibrant,
+			"vhs" => ImageFilter.Vhs,
 			_ => throw new Exception("Expected image filter, found: " + values[n])
 		};
 	}
@@ -161,9 +243,34 @@ class ConfigLine{
 			"bicubic" => ImageScaling.Bicubic,
 			"spline" => ImageScaling.Spline,
 			"lanczos" => ImageScaling.Lanczos,
-			"fast_bilinear" => ImageScaling.FastBilinear,
+			"fastbilinear" => ImageScaling.FastBilinear,
 			"gauss" => ImageScaling.Gauss,
+			"bicublin" => ImageScaling.Bicublin,
+			"sinc" => ImageScaling.Sinc,
 			_ => throw new Exception("Expected image scaling, found: " + values[n])
+		};
+	}
+	
+	public AudioFilter getAFilterAt(int n){
+		if(!tryValueAt(n)){
+			throw new Exception("Expected audio filter at position " + n);
+		}
+		
+		return values[n].ToLower() switch{
+			"none" => AudioFilter.None,
+			"bassboost" => AudioFilter.BassBoost,
+			"tremble" => AudioFilter.Tremble,
+			"echo" => AudioFilter.Echo,
+			"reverb" => AudioFilter.Reverb,
+			"softclip" => AudioFilter.SoftClip,
+			"bitcrush" => AudioFilter.BitCrush,
+			"radio" => AudioFilter.Radio,
+			"vhs" => AudioFilter.Vhs,
+			"vinyl" => AudioFilter.Vinyl,
+			"underwater" => AudioFilter.UnderWater,
+			"dreamy" => AudioFilter.Dreamy,
+			"lowquality" => AudioFilter.LowQuality,
+			_ => throw new Exception("Expected audio filter, found: " + values[n])
 		};
 	}
 	
