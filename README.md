@@ -41,13 +41,13 @@ List of valid options:
 |`video_height`|1|`number`|`1080`|Sets the output video height in pixels|
 |`video_framerate`|1|`number`|`30`|Sets the output video framerate in Hz (FPS)|
 |`video_filter`|1|[filter](#filter)|`none`|Sets the output video filter|
-|`in_transition`|2 or 3|[video transition effect](#video transition effect), `duration` or [video transition](#video transition), `min duration`, `max duration`|`none`, `0`|Sets the transition at the start of the video, with an effect and a duration (in seconds) inside a random range|
-|`in_transition_effect`|1|[video transition effect](#video transition effect)|`none`|Sets the effect of the transition at the start of the video|
+|`in_transition`|2 or 3|[video transition effect](#video-transition-effect), `duration` or [video transition effect](#video-transition-effect), `min duration`, `max duration`|`none`, `0`|Sets the transition at the start of the video, with an effect and a duration (in seconds) inside a random range|
+|`in_transition_effect`|1|[video transition effect](#video-transition-effect)|`none`|Sets the effect of the transition at the start of the video|
 |`in_transition_dur`|1 or 2|`duration` or `min duration`, `max duration`|`0`|Sets the duration (in seconds) of the transition at the start of the video, inside a random range|
 |`in_transition_dur_min`|1|`min duration`|`0`|Sets the minimum duration (in seconds) of the transition at the start of the video, for a random range|
 |`in_transition_dur_max`|1|`max duration`|`0`|Sets the maximum duration (in seconds) of the transition at the start of the video, for a random range|
-|`out_transition`|2 or 3|[video transition effect](#video transition effect), `duration` or [video transition](#video transition), `min duration`, `max duration`|`none`, `0`|Sets the transition at the end of the video, with an effect and a duration (in seconds) inside a random range|
-|`out_transition_effect`|1|[video transition effect](#video transition effect)|`none`|Sets the effect of the transition at the end of the video|
+|`out_transition`|2 or 3|[video transition effect](#video-transition-effect), `duration` or [video transition effect](#video-transition-effect), `min duration`, `max duration`|`none`, `0`|Sets the transition at the end of the video, with an effect and a duration (in seconds) inside a random range|
+|`out_transition_effect`|1|[video transition effect](#video-transition-effect)|`none`|Sets the effect of the transition at the end of the video|
 |`out_transition_dur`|1 or 2|`duration` or `min duration`, `max duration`|`0`|Sets the duration (in seconds) of the transition at the end of the video, inside a random range|
 |`out_transition_dur_min`|1|`min duration`|`0`|Sets the minimum duration (in seconds) of the transition at the end of the video, for a random range|
 |`out_transition_dur_max`|1|`max duration`|`0`|Sets the maximum duration (in seconds) of the transition at the end of the video, for a random range|
@@ -58,30 +58,30 @@ List of valid options:
 |`def_slide_dur`|1 or 2|`duration` or `min duration`, `max duration`|`1`|Sets the default duration (in seconds) of slides, as a random range|
 |`def_slide_dur_min`|1|`min duration`|`1`|Sets the default duration (in seconds) of slides, as a random range|
 |`def_slide_dur_max`|1|`max duration`|`1`|Sets the default duration (in seconds) of slides, as a random range|
-|`slide_dur`|2 or 3|[slide index](#slide index), `duration` or [slide index](#slide index), `min duration`, `max duration`||Sets the duration (in seconds) of a slide in particular, as a random range|
-|`slide_dur_min`|2|[slide index](#slide index), `min duration`||Sets the minimum duration (in seconds) of a slide in particular, inside a random range|
-|`slide_dur_max`|2|[slide index](#slide index), `max duration`||Sets the minimum duration (in seconds) of a slide in particular, inside a random range|
-|`def_slide_transition`|2 or 3|[slide transition effect](#slide transition effect), `duration` or [slide transition effect](#slide transition effect), `min duration`, `max duration`|`none`, `0`|Sets the default transition between slides, with an effect and a duration (in seconds) inside a random range|
-|`def_slide_transition_effect`|1|[slide transition effect](#slide transition effect)|`none`, `0`|Sets the effect of the default transition between slides|
+|`slide_dur`|2 or 3|[slide index](#slide-index), `duration` or [slide index](#slide-index), `min duration`, `max duration`||Sets the duration (in seconds) of a slide in particular, as a random range|
+|`slide_dur_min`|2|[slide index](#slide-index), `min duration`||Sets the minimum duration (in seconds) of a slide in particular, inside a random range|
+|`slide_dur_max`|2|[slide index](#slide-index), `max duration`||Sets the minimum duration (in seconds) of a slide in particular, inside a random range|
+|`def_slide_transition`|2 or 3|[slide transition effect](#slide-transition-effect), `duration` or [slide transition effect](#slide-transition-effect), `min duration`, `max duration`|`none`, `0`|Sets the default transition between slides, with an effect and a duration (in seconds) inside a random range|
+|`def_slide_transition_effect`|1|[slide transition effect](#slide-transition-effect)|`none`, `0`|Sets the effect of the default transition between slides|
 |`def_slide_transition_dur`|1 or 2|`duration` or `min duration`, `max duration`|`0`|Sets the duration (in seconds) of the default transition between slides, inside a random range|
 |`def_slide_transition_dur_min`|1|`min duration`|`0`|Sets the minimum duration (in seconds) of the default transition between slides, inside a random range|
 |`def_slide_transition_dur_max`|1|`max duration`|`0`|Sets the maximum duration (in seconds) of the default transition between slides, inside a random range|
-|`slide_transition`|3 or 4|[slide index](#slide index), [slide transition effect](#slide transition effect), `duration` or [slide index](#slide index), [slide transition effect](#slide transition effect), `min duration`, `max duration`||Sets the transition between the specified slide and the next, with an effect and a duration (in seconds) inside a random range|
-|`slide_transition_effect`|2|[slide index](#slide index), [slide transition effect](#slide transition effect)||Sets the effect of the transition between the specified slide and the next|
-|`slide_transition_dur`|2 or 3|[slide index](#slide index), `duration` or [slide index](#slide index), `min duration`, `max duration`||Sets the duration (in seconds) of the transition between the specified slide and the next, inside a random range|
-|`slide_transition_dur_min`|2|[slide index](#slide index), `min duration`||Sets the minimum duration (in seconds) of the transition between the specified slide and the next, inside a random range|
-|`slide_transition_dur_max`|2|[slide index](#slide index), `max duration`||Sets the maximum duration (in seconds) of the transition between the specified slide and the next, inside a random range|
+|`slide_transition`|3 or 4|[slide index](#slide-index), [slide transition effect](#slide-transition-effect), `duration` or [slide index](#slide-index), [slide transition effect](#slide-transition-effect), `min duration`, `max duration`||Sets the transition between the specified slide and the next, with an effect and a duration (in seconds) inside a random range|
+|`slide_transition_effect`|2|[slide index](#slide-index), [slide transition effect](#slide-transition-effect)||Sets the effect of the transition between the specified slide and the next|
+|`slide_transition_dur`|2 or 3|[slide index](#slide-index), `duration` or [slide index](#slide-index), `min duration`, `max duration`||Sets the duration (in seconds) of the transition between the specified slide and the next, inside a random range|
+|`slide_transition_dur_min`|2|[slide index](#slide-index), `min duration`||Sets the minimum duration (in seconds) of the transition between the specified slide and the next, inside a random range|
+|`slide_transition_dur_max`|2|[slide index](#slide-index), `max duration`||Sets the maximum duration (in seconds) of the transition between the specified slide and the next, inside a random range|
 |`def_slide_filter`|1|[filter](#filter)|`none`|Sets the default filter for the images of all slides|
-|`slide_filter`|2|[slide index](#slide index), [filter](#filter)||Sets the filter for the image of a specific slide|
+|`slide_filter`|2|[slide index](#slide-index), [filter](#filter)||Sets the filter for the image of a specific slide|
 |`def_slide_scaling`|1|[scaling](#scaling)|`neighbor`|Sets the default scaling technique for the images of all slides|
-|`slide_scaling`|2|[slide index](#slide index), [scaling](#scaling)||Sets the scaling technique for the image of a specific slide|
-|`slide_image`|2|[slide index](#slide index), `image path`||Sets the image for a specific slide with its file path|
+|`slide_scaling`|2|[slide index](#slide-index), [scaling](#scaling)||Sets the scaling technique for the image of a specific slide|
+|`slide_image`|2|[slide index](#slide-index), `image path`||Sets the image for a specific slide with its file path|
 |`image_selection_mode`|1|[image selection mode](#image selection mode)|`random`|Sets how the images for the slides will be chosen from the pool|
 |`image_pool`|non 0|`path to folder`||Adds all the images to the image pool|
 |`image_folder`|1|`path to folder`||Adds to the image pool all the [images](#Image extensions) inside the folder|
 |`audio_pool`|non 0|`path to folder`||Adds all the audios to the audio pool|
 |`audio_folder`|1|`path to folder`||Adds to the audio pool all the [audios](#Audio extensions) inside the folder|
-|`audio_filter`|1|[audio filter](#audio filter)|`none`|Sets the filter for the audio chosen from the audio pool (if any)|
+|`audio_filter`|1|[audio filter](#audio-filter)|`none`|Sets the filter for the audio chosen from the audio pool (if any)|
 
 ### Types of arguments:
 
