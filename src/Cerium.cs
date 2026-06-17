@@ -21,9 +21,6 @@ class Cerium{
 			
 			string ffmpegPath = config.GetFFMPEGPath();
 			
-			Console.WriteLine(fa);
-			Console.WriteLine("\n\n\n\n");
-			
 			ProcessStartInfo psi = new ProcessStartInfo{
 				FileName = ffmpegPath,
 				Arguments = fa,

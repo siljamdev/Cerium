@@ -215,7 +215,13 @@ class Config{
 		
 		switch(selMode){
 			case ImSelectionMode.Order:
-				return imagePool[(n - 1) % imagePool.Length]; //n - 1 because first slide is slide 1, not 0
+				if(imagePoolUnique.Count == 0){
+					imagePoolUnique = imagePool.ToList();
+				}
+				
+				string ret = imagePoolUnique[0];
+				imagePoolUnique.RemoveAt(0);
+				return ret;
 			
 			case ImSelectionMode.Random:
 				return imagePool[rand.Next(imagePool.Length)];
@@ -226,7 +232,7 @@ class Config{
 				}
 				int c = rand.Next(imagePoolUnique.Count);
 				
-				string ret = imagePoolUnique[c];
+				ret = imagePoolUnique[c];
 				imagePoolUnique.RemoveAt(c);
 				
 				return ret;

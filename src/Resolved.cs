@@ -75,13 +75,35 @@ class Resolved{
 		}
 		
 		//Splitting
-		filterComplex.Append("[i0]split=2[i0_b][i0_c];");
-		
-		for(int i = 1; i < slideNum - 1; i++){
-			filterComplex.Append("[i" + i + "]split=3[i" + i + "_a][i" + i + "_b][i" + i + "_c];");
+		if(slideTransitions[0] == SlideTransition.None){ //b not needed
+			filterComplex.Append("[i0]null[i0_c];");
+		}else{
+			filterComplex.Append("[i0]split=2[i0_b][i0_c];");
 		}
 		
-		filterComplex.Append("[i" + (slideNum - 1) + "]split=2[i" + (slideNum - 1) + "_a][i" + (slideNum - 1) + "_c];");
+		//Splitting
+		for(int i = 1; i < slideNum - 1; i++){
+			if(slideTransitions[i] == SlideTransition.None){ //b not needed
+				if(slideTransitions[i - 1] == SlideTransition.None){ //a not needed
+					filterComplex.Append("[i" + i + "]null[i" + i + "_c];");
+				}else{
+					filterComplex.Append("[i" + i + "]split=2[i" + i + "_a][i" + i + "_c];");
+				}
+			}else{
+				if(slideTransitions[i - 1] == SlideTransition.None){ //a not needed
+					filterComplex.Append("[i" + i + "]split=2[i" + i + "_b][i" + i + "_c];");
+				}else{
+					filterComplex.Append("[i" + i + "]split=3[i" + i + "_a][i" + i + "_b][i" + i + "_c];");
+				}
+			}
+		}
+		
+		//Splitting
+		if(slideTransitions[slideNum - 2] == SlideTransition.None){ //a not needed
+			filterComplex.Append("[i" + (slideNum - 1) + "]null[i" + (slideNum - 1) + "_c];");
+		}else{
+			filterComplex.Append("[i" + (slideNum - 1) + "]split=2[i" + (slideNum - 1) + "_a][i" + (slideNum - 1) + "_c];");
+		}
 		
 		//Slide transitions
 		generateTransitions(filterComplex);
@@ -90,37 +112,49 @@ class Resolved{
 		for(int i = 0; i < slideNum; i++){
 			//filterComplex.Append("[v" + i + "c]" + toMotion(slideMotions[i]) + "[v" + i + "d];");
 			filterComplex.Append("[i" + i + "_c]loop=loop=-1:size=1:start=0,trim=duration=" + slideDuration[i] + ",format=yuv420p[v" + i + "];");
+			//filterComplex.Append("[i" + i + "_c]loop=loop=" + ((int) (slideDuration[i] * fps)) + ":size=1:start=0,format=yuv420p[v" + i + "];");
 		}
 		
 		//Combining
+		int y = slideNum;
 		for(int i = 0; i < slideNum - 1; i++){
 			filterComplex.Append("[v" + i + "]");
-			filterComplex.Append("[t" + i + "]");
+			if(slideTransitions[i] != SlideTransition.None){
+				filterComplex.Append("[t" + i + "]");
+				y++;
+			}
 		}
 		filterComplex.Append("[v" + (slideNum - 1) + "]");
 		
-		filterComplex.Append("concat=n=" + (slideNum * 2 - 1) + ":v=1:a=0[pre];"); //Concat all image streams
+		filterComplex.Append("concat=n=" + y + ":v=1:a=0[pre];"); //Concat all image streams
 		
 		//In out
 		addInOutTransitions(filterComplex);
 		
 		//Video filter
 		if(videoFilter == ImageFilter.None){
-			filterComplex.Append("[outf]null[out];");
+			filterComplex.Append("[outf]fps=" + fps + "[out];");
 		}else{
 			filterComplex.Append("[outf]" + (videoFilter != ImageFilter.None ? (toImageFilter(videoFilter) + ",") : "") + "fps=" + fps + "[out];");
 		}
 		
+		//Audio
 		if(hasAudio){
 			filterComplex.Append("[0:a]aresample=async=1,apad=whole_dur=" + (totalDuration + 100) + (audioFilter == AudioFilter.None ? "" : ("," + toAudioFilter(audioFilter))) + "[aout];");
 		}
 		
 		//Because it gets too long
 		tempFile = Path.GetTempFileName();
-		
 		File.WriteAllText(tempFile, filterComplex.ToString());
 		
-		string args = inputArgs + " -hide_banner -strict experimental -filter_complex_script \"" + tempFile + "\" -map [out] -r " + fps + (hasAudio ? " -map [aout]" : "") + " -shortest -color_range pc -pix_fmt yuv420p \"" + title + ".mp4\"";
+		string args = inputArgs + " -hide_banner -strict experimental -filter_complex_script \"" + tempFile + "\" -map [out] " + (hasAudio ? " -map [aout]" : "") + " -shortest -color_range pc -pix_fmt yuv420p -r " + fps + " \"" + title + ".mp4\"";
+		
+		Console.WriteLine(args);
+		Console.WriteLine();
+		Console.WriteLine(filterComplex.ToString());
+		Console.WriteLine();
+		Console.WriteLine("Expected duration: " + totalDuration);
+		Console.WriteLine("\n\n\n");
 		
 		return args;
     }
@@ -134,13 +168,11 @@ class Resolved{
 	void generateTransitions(StringBuilder filterComplex){
 		//For slide i and i + 1
 		for(int i = 0; i < slideNum - 1; i++){
-			//Generate videos
-			filterComplex.Append("[i" + i + "_b]loop=loop=-1:size=1:start=0,trim=duration=" + slideTransitionsDuration[i] + ",format=yuv420p[t" + i + "_1];");
-			filterComplex.Append("[i" + (i + 1) + "_a]loop=loop=-1:size=1:start=0,trim=duration=" + slideTransitionsDuration[i] + ",format=yuv420p[t" + i + "_2];");
-			
-			if(slideTransitions[i] == SlideTransition.None){
-				filterComplex.Append("[t" + i + "_1][t" + i + "_2]xfade=transition=fade:duration=0:offset=" + (slideTransitionsDuration[i] / 2) + "[t" + i + "];");
-			}else{
+			if(slideTransitions[i] != SlideTransition.None){
+				//Generate videos
+				filterComplex.Append("[i" + i + "_b]loop=loop=-1:size=1:start=0,trim=duration=" + slideTransitionsDuration[i] + ",format=yuv420p[t" + i + "_1];");
+				filterComplex.Append("[i" + (i + 1) + "_a]loop=loop=-1:size=1:start=0,trim=duration=" + slideTransitionsDuration[i] + ",format=yuv420p[t" + i + "_2];");
+				
 				filterComplex.Append("[t" + i + "_1][t" + i + "_2]xfade=transition=" + toXfadeName(slideTransitions[i]) + ":duration=" + slideTransitionsDuration[i] + ":offset=0[t" + i + "];");
 			}
 		}
