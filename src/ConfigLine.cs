@@ -92,7 +92,7 @@ class ConfigLine{
 			"ignore" => Priority.Ignore,
 			"override" => Priority.Override,
 			"merge" => Priority.Merge,
-			"mergeReverse" => Priority.MergeReverse,
+			"mergereverse" => Priority.MergeReverse,
 			_ => throw new Exception("Expected priority name, found: " + values[n])
 		};
 	}
